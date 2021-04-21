@@ -137,9 +137,10 @@
     :list
     (do
       (def list-tag (case (attribute node :kind) :bullet "ul" :ordinal "ol"))
-      (def list-attrs (if (def start (attribute node :start))
-                        (string " start=\"" start "\"")
-                        ""))
+      (def list-start (attribute node :start))
+      (def list-attrs (if (or (nil? list-start) (= 1 list-start))
+                        ""
+                        (string " start=\"" list-start "\"")))
       (buffer/push buf "<" list-tag list-attrs ">")
       (each item children
         (buffer/push buf "\n<li>")
