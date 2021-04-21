@@ -289,7 +289,7 @@
 
 (defn parse-md [input &opt your-blocks your-inlines your-functions your-priorities]
   (default your-blocks (-> (table/to-struct blocks/grammar) peg/compile))
-  (default your-inlines (peg/compile inlines/grammar))
+  (default your-inlines (-> (table/to-struct inlines/grammar) peg/compile))
   (default your-functions rules)
   (default your-priorities priorities)
   (-> input
