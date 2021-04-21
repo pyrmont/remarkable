@@ -25,7 +25,7 @@
 
 (def grammar
   ~{:codespan {:main  (+ (unref (/ (* :open '(to :close) :close) ,codespan))
-                         (/ '(some "`") ,to-fragment))
+                         '(some "`"))
                :open  (<- (some "`") :delim)
                :close (* (! (> -1 "`")) (backmatch :delim) (not "`"))}})
 

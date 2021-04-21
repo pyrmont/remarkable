@@ -89,10 +89,6 @@
   pos)
 
 
-(defn to-fragment [content]
-  [:fragment content])
-
-
 (defn to-continuation [block-type line pos]
   (def content (-> (string/slice line pos) string/trim))
   [block-type @{} @[content]])

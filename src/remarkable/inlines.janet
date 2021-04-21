@@ -29,29 +29,29 @@
 (def grammar
   ~@{:main :inlines
 
-    :alpha (range "AZ" "az")
-    :alnum (+ :alpha (range "09"))
+     :alpha (range "AZ" "az")
+     :alnum (+ :alpha (range "09"))
 
-    :punc (set "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~")
+     :punc (set "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~")
 
-    :ws    (set " \n\r\v\t")
-    :nl    "\n"
-    :blank (* "\n" (any :space) "\n")
-    :space (set " \t")
+     :ws    (set " \n\r\v\t")
+     :nl    "\n"
+     :blank (* "\n" (any :space) "\n")
+     :space (set " \t")
 
-    :char    (if-not (+ (set "&<>*_[]!`\\") (* (at-least 2 :space) "\n")) '1)
-    :entity  (/ (+ (* (constant :ent) '(* "&" (some (+ :w :d)) ";"))
-                   (* (constant :dec) '(* "&#" (between 1 7 :d) ";"))
-                   (* (constant :hex) '(* "&#" (set "Xx") (between 1 6 :h) ";")))
-                ,entity-decode)
-    :escaped (+ (* "\\" ':punc)
-                '(* "\\" (if-not :nl 1)))
+     :char    (if-not (+ (set "&<>*_[]!`\\") (* (at-least 2 :space) "\n")) '1)
+     :entity  (/ (+ (* (constant :ent) '(* "&" (some (+ :w :d)) ";"))
+                    (* (constant :dec) '(* "&#" (between 1 7 :d) ";"))
+                    (* (constant :hex) '(* "&#" (set "Xx") (between 1 6 :h) ";")))
+                 ,entity-decode)
+     :escaped (+ (* "\\" ':punc)
+                 '(* "\\" (if-not :nl 1)))
 
-    :inlines (any :inline)
-    :inline  (+ ,(tuple ;inline))
+     :inlines (any :inline)
+     :inline  (+ ,(tuple ;inline))
 
-    :trail (* :space ':nl)
-    :text  (/ (+ (% (some (+ :escaped :entity :trail :char))) '1) ,to-fragment)})
+     :trail (* :space ':nl)
+     :text  (+ (% (some (+ :escaped :entity :trail :char))) '1)})
 
 
 (add-to grammar autolink/grammar)

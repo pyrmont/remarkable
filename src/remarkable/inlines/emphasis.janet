@@ -16,7 +16,7 @@
 
 
 (def grammar
-  ~{:emphasis {:main   (+ (/ (* ($) :runs) ,emphasis) (/ :run ,to-fragment))
+  ~{:emphasis {:main   (+ (/ (* ($) :runs) ,emphasis) :run)
                :uws    (+ :ws # include other Unicode whitespace
                           "\u00A0" "\u1680" "\u2000" "\u2001" "\u2002" "\u2003"
                           "\u2004" "\u2005" "\u2006" "\u2007" "\u2008" "\u2009"

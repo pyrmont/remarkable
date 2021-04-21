@@ -148,10 +148,10 @@
 (defn- append-element [node element]
   (def children (children-of node))
   (def last-child (array/peek children))
-  (if (= :fragment (type-of element))
+  (if (bytes? element)
     (if (buffer? last-child)
-      (buffer/push last-child (get element 1))
-      (array/push children (buffer (get element 1))))
+      (buffer/push last-child element)
+      (array/push children (buffer element)))
     (array/push children element)))
 
 
@@ -225,11 +225,9 @@
   (def root [:root @{} @[]])
   (def ancestors @[])
   (var curr root)
-  (var ignore? false)
   (each element elements
     (if (not= :delims (type-of element))
-      (unless ignore?
-        (append-element curr element))
+      (append-element curr element)
       (do
         # If there are any leftover characters in the delimiter we need to
         # decide either to append them to the parent either before or after
@@ -238,7 +236,7 @@
         # characters should be appended after the inline elements.
         (def leftovers
           (unless (zero? (attribute element :count))
-            [:fragment (string/slice text (attribute element :start-pos) (attribute element :end-pos))]))
+            (string/slice text (attribute element :start-pos) (attribute element :end-pos))))
 
         (def prepend-leftovers?
           (and (not= 0 (length (children-of element)))
