@@ -10,11 +10,11 @@
 
 (declare-executable
   :name "remark"
-  :entry "src/remarkable.janet")
+  :entry "src/remarkable/init.janet")
 
 
 (declare-source
-  :source ["src/remarkable.janet"])
+  :source ["src/remarkable"])
 
 
 (phony "spec" []
