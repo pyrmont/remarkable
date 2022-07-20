@@ -1,10 +1,10 @@
-(use ./remarkable/globals)
+(use ./globals)
 
 
-(import ./remarkable/blocks)
-(import ./remarkable/inlines)
-(import ./remarkable/parser)
-(import ./remarkable/renderers/html)
+(import ./blocks)
+(import ./inlines)
+(import ./parser)
+(import ./renderers/html)
 
 
 (defn parse-md [input &opt your-blocks your-inlines your-functions your-priorities]
