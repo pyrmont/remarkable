@@ -1,5 +1,5 @@
 (def input "CaseFolding.txt") # http://unicode.org/Public/UCD/latest/ucd/CaseFolding.txt
-(def output "src/remarkable/folding.janet")
+(def output "lib/folding.janet")
 (def indent "   ")
 
 (def case-fold-fn

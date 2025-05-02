@@ -1,8 +1,8 @@
-(import json)
+(import ../deps/medea/lib/decode :as json)
 
 
 (def input "entities.json") # https://html.spec.whatwg.org/entities.json
-(def output "src/remarkable/entities.janet")
+(def output "lib/entities.janet")
 (def indent "   ")
 
 

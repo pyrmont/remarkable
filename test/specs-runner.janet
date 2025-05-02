@@ -1,5 +1,5 @@
-(import json)
-(import ../src/remarkable :as mark)
+(import ../deps/medea/lib/decode :as json)
+(import ../lib/init :as remark)
 
 
 (def examples
@@ -83,7 +83,7 @@
   (print "Example #" (get example "example"))
   (def input (get example "markdown"))
   (def expect (get example "html"))
-  (def actual (-> input mark/parse-md (mark/render-html {:start-nl? false})))
+  (def actual (-> input remark/parse-md (remark/render-html {:start-nl? false})))
   (assert (compare-html expect actual)
           (string "-------" "\n"
                   "Example #" (get example "example") "\n"
