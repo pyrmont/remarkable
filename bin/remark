@@ -1,0 +1,4 @@
+#!/usr/bin/env janet
+(import remarkable/lib/cli)
+
+(cli/run)

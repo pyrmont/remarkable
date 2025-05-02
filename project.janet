@@ -9,13 +9,13 @@
               :prefix "medea"
               :include ["lib/decode.janet"]}])
 
-# (declare-executable
-#   :name "remark"
-#   :entry "src/remarkable/init.janet")
+(declare-binscript
+  :main "bin/remark")
 
 (declare-source
   :source ["deps"
-           "lib"]
+           "lib"
+           "init.janet"]
   :prefix "remarkable")
 
 (phony "spec" []

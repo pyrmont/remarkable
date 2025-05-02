@@ -19,9 +19,3 @@
 
 (defn render-html [node &opt opts]
   (html/render node opts))
-
-
-(defn main [& args]
-  (case (length args)
-    1 (-> (file/read stdin :all) parse-md render-html prin)
-    2 (-> (get args 1) parse-md render-html prin)))
