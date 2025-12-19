@@ -80,7 +80,6 @@
 
 
 (defn run-spec [example]
-  (print "Example #" (get example "example"))
   (def input (get example "markdown"))
   (def expect (get example "html"))
   (def actual (-> input remark/parse-md (remark/render-html {:start-nl? false})))
@@ -95,6 +94,10 @@
 
 (def spec-num (-?> (dyn :args) (get 1) scan-number))
 (if (not (nil? spec-num))
-  (run-spec (find |(= spec-num (get $ "example")) examples))
-  (each example examples
-    (run-spec example)))
+  (do
+    (run-spec (find |(= spec-num (get $ "example")) examples))
+    (print "Example " spec-num " passed."))
+  (do
+    (each example examples
+      (run-spec example))
+    (print "All examples passed.")))

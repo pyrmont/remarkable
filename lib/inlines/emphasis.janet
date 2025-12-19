@@ -32,7 +32,11 @@
                :t-wsp  (+ :t-uws :t-punc)
                :l-uws  (+ (> -1 :uws) (! (> -1 1)))
                :t-uws  (+ (> 0 :uws) (> 0 -1))
-               :l-punc (> -1 :punc)
+               # UTF-8 aware lookbehind: verify start byte matches offset to ensure char ends here
+               :l-punc (+ (* (> -1 (range "\x00\x7F")) (> -1 :punc))  # 1-byte (ASCII)
+                          (* (> -2 (range "\xC0\xDF")) (> -2 :punc))  # 2-byte
+                          (* (> -3 (range "\xE0\xEF")) (> -3 :punc))  # 3-byte
+                          (* (> -4 (range "\xF0\xF7")) (> -4 :punc))) # 4-byte
                :t-punc (> 0 :punc)}})
 
 

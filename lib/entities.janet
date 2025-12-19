@@ -2127,7 +2127,6 @@
    "&zwnj;" "\xE2\x80\x8C"
 })
 
-
 (defn valid-entity? [entity]
   (not= nil (get entity-map entity)))
 

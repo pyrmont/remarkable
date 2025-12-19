@@ -23,7 +23,7 @@
             :type-1 {:main    (* (constant 1) '(* :open (? (thru :close)) (thru :eol)))
                      :open    (* "<" :keyword (? " >"))
                      :close   (* "</" :keyword ">" (constant true))
-                     :keyword ,(words "script" "style" "pre")}
+                     :keyword ,(words "pre" "script" "style" "textarea")}
             :type-2 (* (constant 2) '(* "<!--" (? (* (thru "-->") (constant true))) (thru :eol)))
             :type-3 (* (constant 3) '(* "<?" (? (* (thru "?>") (constant true))) (thru :eol)))
             :type-4 (* (constant 4) '(* "<!" (range "AZ") (? (* (thru ">") (constant true))) (thru :eol)))
@@ -47,7 +47,7 @@
             :type-7 {:main  (* (constant 7) '(* (+ :open :close) (any :space) :eol))
                      :open  (* "<" :name :attrs (any :space) ">")
                      :close (* "</" :name (any :space) ">")
-                     :name  (* (not ,(words "script" "style" "pre")) :w (any (+ :w :d "-")))}}})
+                     :name  (* (not ,(words "pre" "script" "style" "textarea")) :w (any (+ :w :d "-")))}}})
 
 
 ## Functions
@@ -94,7 +94,7 @@
       :eol    -1
       :space  (set " \t\n")
       :close  (/ ,(case (attribute an-html :kind)
-                    1 ~(<- (* (thru (* "</" ,(words "script" "style" "pre") ">")) (thru :eol)))
+                    1 ~(<- (* (thru (* "</" ,(words "pre" "script" "style" "") ">")) (thru :eol)))
                     2 ~(<- (* (thru "-->") (thru :eol)))
                     3 ~(<- (* (thru "?>") (thru :eol)))
                     4 ~(<- (* (thru ">") (thru :eol)))

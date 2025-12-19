@@ -19,7 +19,9 @@
                             :double  (* `"` (to `"`) `"`)}
               :opening-tag (* "<" :name (any :attribute) (any :ws) (? "/") ">")
               :closing-tag (* "</" :name (any :ws) ">")
-              :comment     (* "<!--" (not (+ ">" "->")) (thru "--") ">")
+              :bad-comment (* "<!--" (any "-") ">")
+              :ok-comment  (* "<!--" (to "-->") "-->")
+              :comment     (+ :bad-comment :ok-comment)
               :instruction (* "<?" (thru "?>"))
               :declaration (* "<!" (some (range "AZ")) (some :ws) (some (if-not ">" 1)) ">")
               :cdata       (* "<![CDATA[" (thru "]]>"))}})

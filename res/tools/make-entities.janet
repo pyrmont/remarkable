@@ -1,10 +1,9 @@
-(import ../deps/medea/lib/decode :as json)
+(import ../../deps/medea/lib/decode :as json)
+(import ./util)
 
-
-(def input "entities.json") # https://html.spec.whatwg.org/entities.json
+(def src "https://html.spec.whatwg.org/entities.json")
 (def output "lib/entities.janet")
 (def indent "   ")
-
 
 (def valid-entity-fn
   ```
@@ -12,27 +11,25 @@
     (not= nil (get entity-map entity)))
   ```)
 
-
 (def to-grapheme-fn
   ```
   (defn to-grapheme [entity]
     (get entity-map entity))
   ```)
 
-
 (defn get-chars [mappings k]
   (-> (get mappings k) (get "characters")))
 
-
+(def content (util/slurp-url src))
 (with [dest (file/open output :w)]
-  (def mappings (json/decode (slurp input)))
+  (def mappings (json/decode content))
   (def ks (->> (keys mappings) (filter |(string/has-suffix? ";" $)) sort))
   (file/write dest "(def entity-map\n  {\n")
   (loop [k :in ks]
     (file/write dest indent)
     (file/write dest (string/format "%j %j\n" k (get-chars mappings k))))
   (file/write dest "})")
-  (file/write dest "\n\n\n")
+  (file/write dest "\n\n")
   (file/write dest valid-entity-fn)
-  (file/write dest "\n\n\n")
+  (file/write dest "\n\n")
   (file/write dest to-grapheme-fn))
