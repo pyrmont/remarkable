@@ -1,4 +1,4 @@
-(import ./util)
+(import ../helpers/util)
 
 (def src "https://raw.githubusercontent.com/commonmark/cmark/refs/heads/master/src/utf8.c")
 (def output "lib/punctuation.janet")
@@ -13,19 +13,17 @@
                "uc" :s+ "<=" :s+ (number :d+))
      :equal (* "uc" :s+ "==" :s+ (number :d+))})
 
+(print "Downloading " src "...")
 (def content (util/slurp-url src))
 (def start (string/find fname content))
 (def comps (peg/match grammar content (+ start (length fname))))
-
 (def b @"")
 (buffer/push b "(defn upunc? [x]\n  (or\n")
-
 (each c comps
   (if (indexed? c)
     (buffer/push b "    (and (>= x " (string (c 0)) ") (<= x " (string (c 1)) "))\n")
     (buffer/push b "    (= x " (string c) ")\n")))
-
 (buffer/popn b 1)
 (buffer/push b "))")
-
 (spit output b)
+(print "Extracted " (length comps) " comparisons to " output)

@@ -1,4 +1,4 @@
-(import ./util)
+(import ../helpers/util)
 
 (def src "http://unicode.org/Public/UCD/latest/ucd/CaseFolding.txt")
 (def output "lib/folding.janet")
@@ -35,9 +35,11 @@
     (string buf))
   ```)
 
+(print "Downloading " src "...")
 (def content (util/slurp-url src))
 (with [dest (file/open output :w)]
     (file/write dest "(def lower\n  {\n")
+    (var cnt 0)
     (each line (string/split "\n" content)
       (unless (or (empty? line)
                   (= 10 (get line 0))
@@ -45,9 +47,11 @@
         (def [before kind after] (string/split "; " line))
         (when (or (= "C" kind)
                   (= "F" kind))
-          (def afters (->> (string/split " " after) (map |(string "0x" $))))
+          (++ cnt)
+          (def afters (->> (string/split " " after) (map (fn [x] (string "0x" x)))))
           (file/write dest indent)
           (file/write dest (string "0x" before " [" (string/join afters " ") "]\n")))))
     (file/write dest "})\n")
     (file/write dest "\n\n")
-    (file/write dest case-fold-fn))
+    (file/write dest case-fold-fn)
+    (print "Extracted " cnt " mappings to " output))

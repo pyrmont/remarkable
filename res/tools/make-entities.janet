@@ -1,5 +1,5 @@
 (import ../../deps/medea/lib/decode :as json)
-(import ./util)
+(import ../helpers/util)
 
 (def src "https://html.spec.whatwg.org/entities.json")
 (def output "lib/entities.janet")
@@ -20,10 +20,11 @@
 (defn get-chars [mappings k]
   (-> (get mappings k) (get "characters")))
 
+(print "Downloading " src "...")
 (def content (util/slurp-url src))
 (with [dest (file/open output :w)]
   (def mappings (json/decode content))
-  (def ks (->> (keys mappings) (filter |(string/has-suffix? ";" $)) sort))
+  (def ks (->> (keys mappings) (filter (fn [x] (string/has-suffix? ";" x))) sort))
   (file/write dest "(def entity-map\n  {\n")
   (loop [k :in ks]
     (file/write dest indent)
@@ -32,4 +33,5 @@
   (file/write dest "\n\n")
   (file/write dest valid-entity-fn)
   (file/write dest "\n\n")
-  (file/write dest to-grapheme-fn))
+  (file/write dest to-grapheme-fn)
+  (print "Extracted " (length ks) " entities to " output))
