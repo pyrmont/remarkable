@@ -1,21 +1,20 @@
-(use ./globals)
-
+(import ./state)
 
 (import ./blocks)
 (import ./inlines)
 (import ./parser)
 (import ./renderers/html)
 
-
-(defn parse-md [input &opt your-blocks your-inlines your-functions your-priorities]
-  (default your-blocks (-> (table/to-struct blocks/grammar) peg/compile))
-  (default your-inlines (-> (table/to-struct inlines/grammar) peg/compile))
-  (default your-functions rules)
-  (default your-priorities priorities)
+(defn parse-md
+  [input &named blocks inlines functions priorities]
+  (default blocks (peg/compile blocks/grammar))
+  (default inlines (peg/compile inlines/grammar))
+  (default functions state/rules)
+  (default priorities state/priorities)
   (-> input
-      (parser/parse-blocks your-blocks your-functions)
-      (parser/parse-all-inlines your-inlines your-functions your-priorities)))
+      (parser/parse-blocks blocks functions)
+      (parser/parse-all-inlines inlines functions priorities)))
 
-
-(defn render-html [node &opt opts]
+(defn render-html
+  [node &opt opts]
   (html/render node opts))

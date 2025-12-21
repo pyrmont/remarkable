@@ -1,12 +1,7 @@
-(use ../globals)
-(use ../utilities)
-
-
 ## Grammar
 
 (defn- rawhtml [content]
   [:rawhtml @{} content])
-
 
 (def grammar
   ~{:rawhtml {:main        (/ '(+ :opening-tag :closing-tag :comment :instruction :declaration :cdata) ,rawhtml)

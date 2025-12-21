@@ -1,13 +1,10 @@
-(use ../globals)
-(use ../utilities)
-
+(import ../state)
 
 ## Grammar
 
 (defn- blank []
-  (when (< (- col-edge col-pos) 4)
+  (when (< (- state/col-edge state/col-pos) 4)
     [:blank]))
-
 
 (def grammar
   ~{:blank (cmt :nl ,blank)})

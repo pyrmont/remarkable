@@ -1,26 +1,22 @@
-(use ../globals)
-(use ../utilities)
-
+(import ../state)
+(import ../util)
 
 (defn- blockquote [trailing-space]
-  (++ col-edge)
-  (set col-pos col-edge)
-  (record-padding trailing-space)
+  (++ state/col-edge)
+  (set state/col-pos state/col-edge)
+  (util/record-padding trailing-space)
   (unless (empty? trailing-space)
-    (++ col-pos))
+    (++ state/col-pos))
   [:blockquote @{:container? true :open? true} @[]])
-
 
 (def grammar
   ~{:blockquote (/ (* ">" '(any :space)) ,blockquote)})
 
-
 (defn- blockquote-see-blank [a-blockquote functions]
-  (when (attribute a-blockquote :open?)
-    (attribute a-blockquote :open? false)
-    (close-children a-blockquote functions)))
+  (when (util/attribute a-blockquote :open?)
+    (util/attribute a-blockquote :open? false)
+    (util/close-children a-blockquote functions)))
 
-
-(add-to rules
+(util/add-to state/rules
   @{:blocks
     @{:blockquote {:see-blank   blockquote-see-blank}}})

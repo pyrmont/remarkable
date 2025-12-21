@@ -1,26 +1,23 @@
-(use ../globals)
-(use ../utilities)
-
+(import ../state)
+(import ../util)
 
 ## Grammar
 
 (defn- list-item [marker-width trailing-space &opt starts-blank?]
-  (def start-pos col-pos)
-  (+= col-edge marker-width)
-  (set col-pos col-edge)
-  (record-padding trailing-space)
+  (def start-pos state/col-pos)
+  (+= state/col-edge marker-width)
+  (set state/col-pos state/col-edge)
+  (util/record-padding trailing-space)
   (if (empty? trailing-space)
-    (++ col-pos)
-    (+= col-pos (if (or starts-blank? (> (- col-edge col-pos) 4)) 1 (- col-edge col-pos))))
-  [:list-item @{:container? true :open? true :width (- col-pos start-pos) :starts-blank? starts-blank?} @[]])
-
+    (++ state/col-pos)
+    (+= state/col-pos (if (or starts-blank? (> (- state/col-edge state/col-pos) 4)) 1 (- state/col-edge state/col-pos))))
+  [:list-item @{:container? true :open? true :width (- state/col-pos start-pos) :starts-blank? starts-blank?} @[]])
 
 (defn- list [kind marker delim trailing-space &opt starts-blank?]
   (def start (when (= :ordinal kind) (scan-number marker)))
   (def marker-width (+ (length marker) (if (nil? delim) 0 1)))
   (def item (list-item marker-width trailing-space starts-blank?))
   [:list @{:kind kind :marker marker :delim delim :start start :tight? true :container? true :open? true} @[item]])
-
 
 (def grammar
   ~{:list {:main    (cmt (* :marker :after) ,list)
@@ -30,105 +27,88 @@
            :after   (+ (* '(any :space) :eol (constant true))
                        (* '(some :space)))}})
 
-
 ## Functions
 
-
 (defn- list-blank [a-list parent functions]
-  (def item (next-container a-list))
+  (def item (util/next-container a-list))
   (when (and (not (nil? item))
-             (attribute item :starts-blank?)
-             (zero? (length (children-of item))))
-    (attribute item :open? false))
-  (attribute a-list :has-blank? true)
-  (next-container a-list))
-
+             (util/attribute item :starts-blank?)
+             (zero? (length (util/children-of item))))
+    (util/attribute item :open? false))
+  (util/attribute a-list :has-blank? true)
+  (util/next-container a-list))
 
 (defn- list-equal? [a-list block]
-  (and (= :list (type-of block))
-       (= (attribute a-list :kind) (attribute block :kind))
-       (or (and (= :ordinal (attribute a-list :kind))
-                (= (attribute a-list :delim) (attribute block :delim)))
-           (and (= :bullet (attribute a-list :kind))
-                (= (attribute a-list :marker) (attribute block :marker))))))
-
+  (and (= :list (util/type-of block))
+       (= (util/attribute a-list :kind) (util/attribute block :kind))
+       (or (and (= :ordinal (util/attribute a-list :kind))
+                (= (util/attribute a-list :delim) (util/attribute block :delim)))
+           (and (= :bullet (util/attribute a-list :kind))
+                (= (util/attribute a-list :marker) (util/attribute block :marker))))))
 
 (defn- list-needs-nl? [a-list]
-  (or (attribute (next-container a-list) :starts-blank?)
-      (and (= :ordinal (attribute a-list :kind))
-           (not= 1 (attribute a-list :start)))))
-
+  (or (util/attribute (util/next-container a-list) :starts-blank?)
+      (and (= :ordinal (util/attribute a-list :kind))
+           (not= 1 (util/attribute a-list :start)))))
 
 # The current open block is a list so we need to handle the case where the
 # line is a continuation of the list. To check this we need to descend through
 # the open list items in the current list that are indented at least as much as
 # the current line.
 (defn- list-next-block [a-list line pos grammar functions]
-  (def next-pos (dedent line pos))
+  (def next-pos (util/dedent line pos))
   (var next-b nil)
   (var parent-list nil)
   (var parent-item nil)
   (var curr-list a-list)
-  (var curr-item (next-container a-list))
+  (var curr-item (util/next-container a-list))
   (while curr-item
-    # Set start col of list item
-    (def curr-width (attribute curr-item :width))
-
-    # Break if there's not enough padding
-    (def remaining-width (- col-edge col-pos))
+    # set start col of list item
+    (def curr-width (util/attribute curr-item :width))
+    # break if there's not enough padding
+    (def remaining-width (- state/col-edge state/col-pos))
     (if (> curr-width remaining-width)
       (break)
-      (+= col-pos curr-width))
-
-    # The parent list is at least equal to the current list
+      (+= state/col-pos curr-width))
+    # the parent list is at least equal to the current list
     (when parent-list
-      (attribute parent-list :has-blank? false))
+      (util/attribute parent-list :has-blank? false))
     (set parent-list curr-list)
-
-    # Create continuation
+    # create continuation
     (def new-item [:list-item-continue (get curr-item 1) @[]])
     (def new-list [:list (get curr-list 1) [new-item]])
-
-    # Set next-b and parent
+    # set next-b and parent
     (if (nil? next-b)
       (set next-b new-list)
-      (array/push (children-of parent-item) new-list))
+      (array/push (util/children-of parent-item) new-list))
     (set parent-item new-item)
-
-    # Break if no more lists
-    (def child (next-container curr-item))
-    (when (or (nil? child) (not= :list (type-of child)))
+    # break if no more lists
+    (def child (util/next-container curr-item))
+    (when (or (nil? child) (not= :list (util/type-of child)))
       (break))
-
-    # Prepare for next round of loop
+    # prepare for next round of loop
     (set curr-list child)
-    (set curr-item (next-container curr-list)))
-
-  # Parse line from current position
+    (set curr-item (util/next-container curr-list)))
+  # parse line from current position
   (def result (peg/match grammar line next-pos))
-
-  # Make parent list loose if a blank line has come before
+  # make parent list loose if a blank line has come before
   (cond
     (and (nil? parent-list)
-         (attribute a-list :has-blank?)
+         (util/attribute a-list :has-blank?)
          (list-equal? a-list (get result 0)))
-    (attribute a-list :tight? false)
-
+    (util/attribute a-list :tight? false)
     (and parent-list
-         (attribute parent-list :has-blank?))
-    (attribute parent-list :tight? false))
-
-  # Return result
+         (util/attribute parent-list :has-blank?))
+    (util/attribute parent-list :tight? false))
+  # return result
   (if (nil? next-b)
     result
     [next-b next-pos]))
 
-
 (defn- list-item-equal? [an-item block]
-  (= :list-item-continue (type-of block)))
+  (= :list-item-continue (util/type-of block)))
 
-
-(add-to rules
+(util/add-to state/rules
   {:blocks
     {:list       {:blank       list-blank
                   :equal?      list-equal?

@@ -1,6 +1,5 @@
-(use ../globals)
-(use ../utilities)
-
+(import ../state)
+(import ../util)
 
 ## Grammar
 
@@ -21,7 +20,6 @@
       [1 (dec (length buf))]
       [0 nil]))
   [:codespan @{} (string/slice buf start end)])
-
 
 (def grammar
   ~{:codespan {:main  (+ (unref (/ (* :open '(to :close) :close) ,codespan))

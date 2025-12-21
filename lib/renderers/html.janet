@@ -1,5 +1,4 @@
-(use ../utilities)
-
+(import ../util)
 
 (defn- html-content [buf line]
   (each c line
@@ -12,27 +11,23 @@
         c)))
   buf)
 
-
 (defn- to-fragment [node]
   (def buf @"")
-  (each child (children-of node)
+  (each child (util/children-of node)
     (if (bytes? child)
       (buffer/push buf child)
       (buffer/push buf (to-fragment child))))
   buf)
 
-
 (defn- render-inline [node]
   (def buf @"")
   (def [kind attrs children] node)
-
   (case kind
     :codespan
     (do
       (buffer/push buf "<code>")
       (html-content buf children)
       (buffer/push buf "</code>"))
-
     :emphasis
     (do
       (buffer/push buf "<em>")
@@ -41,7 +36,6 @@
           (html-content buf child)
           (buffer/push buf (render-inline child))))
       (buffer/push buf "</em>"))
-
     :image
     (do
       (buffer/push buf "<img src=\"" (get attrs :url) "\"")
@@ -55,10 +49,8 @@
           (buffer/push buf child)
           (buffer/push buf (to-fragment child))))
       (buffer/push buf "\" />"))
-
     :hardbreak
     (buffer/push buf "<br />\n")
-
     :link
     (do
       (buffer/push buf "<a href=\"" (get attrs :url) "\"")
@@ -72,10 +64,8 @@
           (html-content buf child)
           (buffer/push buf (render-inline child))))
       (buffer/push buf "</a>"))
-
     :rawhtml
     (buffer/push buf children)
-
     :strong
     (do
       (buffer/push buf "<strong>")
@@ -84,9 +74,7 @@
           (html-content buf child)
           (buffer/push buf (render-inline child))))
       (buffer/push buf "</strong>")))
-
   (string buf))
-
 
 (defn render [node &opt opts]
   (default opts {})
@@ -94,24 +82,20 @@
         :inner?    inner?} opts)
   (def buf @"")
   (when start-nl? (buffer/push buf "\n"))
-
   (def [kind attrs children] node)
-
   (case kind
     :document
     (each child children
       (buffer/push buf (render child {:start-nl? false}) "\n"))
-
     :blockquote
     (do
       (buffer/push buf "<blockquote>")
       (each child children
         (buffer/push buf (render child)))
       (buffer/push buf "\n</blockquote>"))
-
     :codeblock
     (do
-      (def info (attribute node :info))
+      (def info (util/attribute node :info))
       (buffer/push buf
                    "<pre><code"
                    (if (nil? info) "" (string " class=\"language-" info "\""))
@@ -119,25 +103,22 @@
       (each line children
         (html-content buf line))
       (buffer/push buf "</code></pre>"))
-
     :heading
     (do
-      (def level (string (attribute node :level)))
+      (def level (string (util/attribute node :level)))
       (buffer/push buf "<h" level ">")
       (each child children
         (if (bytes? child)
           (html-content buf child)
           (buffer/push buf (render-inline child))))
       (buffer/push buf "</h" level ">"))
-
     :html
     (each line children
       (buffer/push buf line))
-
     :list
     (do
-      (def list-tag (case (attribute node :kind) :bullet "ul" :ordinal "ol"))
-      (def list-start (attribute node :start))
+      (def list-tag (case (util/attribute node :kind) :bullet "ul" :ordinal "ol"))
+      (def list-start (util/attribute node :start))
       (def list-attrs (if (or (nil? list-start) (= 1 list-start))
                         ""
                         (string " start=\"" list-start "\"")))
@@ -145,8 +126,8 @@
       (each item children
         (buffer/push buf "\n<li>")
         (var closing-nl? false)
-        (each child (children-of item)
-          (if (and (attribute node :tight?)
+        (each child (util/children-of item)
+          (if (and (util/attribute node :tight?)
                    (= :paragraph (get child 0)))
             (buffer/push buf (render child {:start-nl? false :inner? true}))
             (do
@@ -156,7 +137,6 @@
           (buffer/push buf "\n"))
         (buffer/push buf "</li>"))
       (buffer/push buf "\n</" list-tag ">"))
-
     :paragraph
     (do
       (unless inner?
@@ -167,8 +147,6 @@
           (buffer/push buf (render-inline child))))
       (unless inner?
         (buffer/push buf "</p>")))
-
     :thematic-break
     (buffer/push buf "<hr />"))
-
   (string buf))
