@@ -1,7 +1,7 @@
 (import ./state)
 (import ./util)
 
-(util/add-to state/rules @{:blocks @{}})
+(util/add-to state/protocols @{:blocks @{}})
 
 (def blocks ~@[+])
 
@@ -53,16 +53,16 @@
 
 ## Block functions
 
-(defn- default-block-append [node block functions]
+(defn- default-block-append [node block protocols]
   (unless (= :blank (util/type-of block))
-    (def replace-fn (util/get-fn :replace block functions))
+    (def replace-fn (util/get-fn :replace block protocols))
     (if replace-fn
       (replace-fn block (util/children-of node))
       (if (def peer (util/next-container node))
-        ((util/get-fn :continue peer functions) peer block)
+        ((util/get-fn :continue peer protocols) peer block)
         (array/push (util/children-of node) block)))))
 
-(defn- default-block-blank [node parent functions]
+(defn- default-block-blank [node parent protocols]
   (util/next-container node))
 
 (defn- default-block-close [node &opt parent]
@@ -83,15 +83,15 @@
 (defn- default-block-needs-nl? [block]
   false)
 
-(defn- default-block-next-block [node line pos grammar functions]
+(defn- default-block-next-block [node line pos grammar protocols]
   (peg/match grammar line pos))
 
-(defn- default-block-see-blank [node functions]
+(defn- default-block-see-blank [node protocols]
   nil)
 
-## Block rules
+## Block default protocol
 
-(util/add-to state/rules
+(util/add-to state/protocols
   {:blocks
     {'default {:append      default-block-append
                :blank       default-block-blank

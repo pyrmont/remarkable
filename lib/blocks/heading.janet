@@ -52,7 +52,7 @@
             (array/push (get parent 2) text))
           (array/push siblings [:paragraph @{:open? true :inlines? true} @[text]]))))))
 
-(util/add-to state/rules
+(util/add-to state/protocols
   {:blocks
     {:heading {:equal?   heading-equal?
                :follower heading-follower

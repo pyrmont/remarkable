@@ -1,5 +1,6 @@
 (import ../state)
 (import ../util)
+(import ../container)
 
 ## Grammar
 
@@ -29,7 +30,7 @@
 
 ## Functions
 
-(defn- list-blank [a-list parent functions]
+(defn- list-blank [a-list parent protocols]
   (def item (util/next-container a-list))
   (when (and (not (nil? item))
              (util/attribute item :starts-blank?)
@@ -55,7 +56,7 @@
 # line is a continuation of the list. To check this we need to descend through
 # the open list items in the current list that are indented at least as much as
 # the current line.
-(defn- list-next-block [a-list line pos grammar functions]
+(defn- list-next-block [a-list line pos grammar protocols]
   (def next-pos (util/dedent line pos))
   (var next-b nil)
   (var parent-list nil)
@@ -108,10 +109,12 @@
 (defn- list-item-equal? [an-item block]
   (= :list-item-continue (util/type-of block)))
 
-(util/add-to state/rules
+# Use container base with list-specific overrides
+(util/add-to state/protocols
   {:blocks
-    {:list       {:blank       list-blank
-                  :equal?      list-equal?
-                  :needs-nl?   list-needs-nl?
-                  :next-block  list-next-block}
-     :list-item  {:equal?      list-item-equal?}}})
+    {:list (container/make-protocol
+             {:equal?     list-equal?
+              :blank      list-blank
+              :next-block list-next-block
+              :needs-nl?  list-needs-nl?})
+     :list-item  {:equal? list-item-equal?}}})

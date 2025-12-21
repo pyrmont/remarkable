@@ -90,7 +90,7 @@
   (util/attribute closer :count (- (util/attribute closer :count) len))
   (util/attribute closer :start-pos (+ (util/attribute closer :start-pos) len)))
 
-(util/add-to state/rules
+(util/add-to state/protocols
   {:inlines
     {:emphasis {:match?   emphasis-match?
                 :match-up emphasis-match-up}}})

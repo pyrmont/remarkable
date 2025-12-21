@@ -3,7 +3,7 @@
 
 ## Blocks
 
-(defn- append-to-document [document line grammar functions]
+(defn- append-to-document [document line grammar protocols]
   (set state/col-edge 0)
   (set state/col-pos 0)
   (var block nil)
@@ -15,12 +15,12 @@
   # TODO: Is this too too complicated?
   (defn descend []
     (defn descend-1 []
-      (def next-block-fn (util/get-fn :next-block peer-node functions))
-      (def [new-b new-pos] (next-block-fn peer-node line pos grammar functions))
+      (def next-block-fn (util/get-fn :next-block peer-node protocols))
+      (def [new-b new-pos] (next-block-fn peer-node line pos grammar protocols))
       (var curr-b new-b)
       (var next-b (util/next-container curr-b))
       (while next-b
-        (def equal-fn (util/get-fn :equal? peer-node functions))
+        (def equal-fn (util/get-fn :equal? peer-node protocols))
         (if (equal-fn peer-node curr-b)
           (do
             (set parent-node peer-node)
@@ -30,7 +30,7 @@
           (set next-b nil)))
       (set block curr-b)
       (set pos new-pos)
-      (def equal-fn (util/get-fn :equal? peer-node functions))
+      (def equal-fn (util/get-fn :equal? peer-node protocols))
       (if (and (< pos (length line)) # TODO: Is this a hack or should there be a check here?
                (equal-fn peer-node curr-b))
         [true (util/next-container peer-node)]
@@ -53,11 +53,11 @@
         (set keep-descending? false))))
 
   (defn lazy-continuation []
-    (when-let [lazy-fn     (util/get-fn :lazy? block functions)
+    (when-let [lazy-fn     (util/get-fn :lazy? block protocols)
                _           (lazy-fn block)
                last-n      (util/last-descendant parent-node)
                _           (util/attribute last-n :open?)
-               follower-fn (util/get-fn :follower block functions)
+               follower-fn (util/get-fn :follower block protocols)
                follow-b    (follower-fn block last-n)]
       (set block follow-b)
       last-n))
@@ -66,8 +66,8 @@
     (var curr-b (or (util/last-descendant block) block))
     (while (< pos (length line))
       (def [next-b next-pos] (peg/match grammar line pos))
-      (def append-fn (util/get-fn :append curr-b functions))
-      (append-fn curr-b next-b functions)
+      (def append-fn (util/get-fn :append curr-b protocols))
+      (append-fn curr-b next-b protocols)
       (set curr-b (or (util/last-descendant next-b) next-b))
       (set pos next-pos)))
 
@@ -78,25 +78,25 @@
         (var curr-n (util/next-container prev-n))
         (var stopped? false)
         (while (and curr-n (not stopped?))
-          (def see-blank-fn (util/get-fn :see-blank curr-n functions))
-          (if (see-blank-fn curr-n functions)
+          (def see-blank-fn (util/get-fn :see-blank curr-n protocols))
+          (if (see-blank-fn curr-n protocols)
             (set stopped? true)
             (do
               (set prev-n curr-n)
               (set curr-n (util/next-container curr-n)))))
         (if stopped?
-          ((util/get-fn :blank curr-n functions) curr-n prev-n functions)
+          ((util/get-fn :blank curr-n protocols) curr-n prev-n protocols)
           (do
             (set prev-n parent-node)
             (set curr-n (util/next-container prev-n))
             (while curr-n
-              (def blank-fn (util/get-fn :blank curr-n functions))
+              (def blank-fn (util/get-fn :blank curr-n protocols))
               (def prev-prev-n prev-n)
               (set prev-n curr-n)
-              (set curr-n (blank-fn prev-n prev-prev-n functions))))))
+              (set curr-n (blank-fn prev-n prev-prev-n protocols))))))
       (do
-        (def append-fn (util/get-fn :append parent-node functions))
-        (append-fn parent-node block functions))))
+        (def append-fn (util/get-fn :append parent-node protocols))
+        (append-fn parent-node block protocols))))
 
   # Match against existing nodes
   (descend)
@@ -104,11 +104,11 @@
   # Either continue direct, continue lazy or close children
   (unless (= :blank (util/type-of block))
     (when-let [peer-node (util/next-child parent-node)
-               equal-fn  (util/get-fn :equal? peer-node functions)
+               equal-fn  (util/get-fn :equal? peer-node protocols)
                _         (not (equal-fn peer-node block))]
       (if (def last-node (lazy-continuation))
         (set parent-node last-node)
-        (util/close-children parent-node functions))))
+        (util/close-children parent-node protocols))))
 
   # Realise block
   (realise-block)
@@ -118,22 +118,24 @@
     (append)))
 
 
-(defn parse-blocks [input grammar functions]
+(defn parse-blocks [input grammar protocols]
   (state/reset-block-globals)
-  (def block-functions (get functions :blocks))
+  # Normalize line endings (CRLF -> LF) per CommonMark spec
+  (def normalized-input (string/replace-all "\r\n" "\n" input))
+  (def block-protocols (get protocols :blocks))
   (def document [:document @{:container? true :open? true} @[]])
-  (def ends (string/find-all "\n" input))
+  (def ends (string/find-all "\n" normalized-input))
   (var start 0)
   (each end ends
     (state/reset-cols)
-    (def line (string/slice input start (inc end)))
-    (append-to-document document line grammar block-functions)
+    (def line (string/slice normalized-input start (inc end)))
+    (append-to-document document line grammar block-protocols)
     (set start (inc end)))
-  (when (< start (length input)) # TODO: Is this necessary?
+  (when (< start (length normalized-input)) # TODO: Is this necessary?
     (state/reset-cols)
-    (def line (string/slice input start))
-    (append-to-document document line grammar block-functions))
-  (util/close-children document block-functions)
+    (def line (string/slice normalized-input start))
+    (append-to-document document line grammar block-protocols))
+  (util/close-children document block-protocols)
   document)
 
 ## Inlines
@@ -147,7 +149,7 @@
       (array/push children (buffer element)))
     (array/push children element)))
 
-(defn- parse-inlines [text grammar functions priorities]
+(defn- parse-inlines [text grammar protocols priorities]
   (state/reset-inline-globals)
   (defn priority [kind]
     (-> (get priorities :kinds) (get kind)))
@@ -155,11 +157,11 @@
     (def opener (get state/delimiters open-i))
     (def closer (get state/delimiters close-i))
     (when (= (util/attribute opener :kind) (util/attribute closer :kind))
-      (def match-fn (-> (get functions (util/attribute opener :kind)) (get :match?)))
+      (def match-fn (-> (get protocols (util/attribute opener :kind)) (get :match?)))
       (match-fn open-i close-i state/delimiters)))
   (defn match-up [open-i close-i]
     (def opener (get state/delimiters open-i))
-    (def match-up-fn (-> (get functions (util/attribute opener :kind)) (get :match-up)))
+    (def match-up-fn (-> (get protocols (util/attribute opener :kind)) (get :match-up)))
     (match-up-fn open-i close-i state/delimiters text))
   (defn matching-pos [closer close-i]
     (var open-i close-i)
@@ -236,22 +238,22 @@
               (set curr [(util/attribute delim :kind) @{} @[]])
               (array/push (util/children-of (array/peek ancestors)) curr))
             (do
-              (def close-fn (util/get-fn :close curr functions))
+              (def close-fn (util/get-fn :close curr protocols))
               (set curr (close-fn curr delim ancestors)))))
         (when (and leftovers (not prepend-leftovers?))
           (append-element curr leftovers)))))
   # Return root
   (util/children-of root))
 
-(defn- walk-tree [node grammar functions priorities]
+(defn- walk-tree [node grammar protocols priorities]
   (def children (util/children-of node))
   (if (util/attribute node :container?)
     (each child children
-      (walk-tree child grammar functions priorities))
+      (walk-tree child grammar protocols priorities))
     (when (util/attribute node :inlines?)
       (def text (-> (string/join children "\n") string/trim))
       (array/clear children)
-      (array/concat children (parse-inlines text grammar functions priorities)))))
+      (array/concat children (parse-inlines text grammar protocols priorities)))))
 
 (defn parse-all-inlines
   ```
@@ -259,6 +261,6 @@
 
   Returns an updated `document`.
   ```
-  [document grammar functions priorities]
-  (walk-tree document grammar (get functions :inlines) priorities)
+  [document grammar protocols priorities]
+  (walk-tree document grammar (get protocols :inlines) priorities)
   document)

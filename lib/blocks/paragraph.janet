@@ -11,10 +11,10 @@
 
 ## Functions
 
-(defn- paragraph-append [a-paragraph continuation functions]
+(defn- paragraph-append [a-paragraph continuation protocols]
   (array/concat (util/children-of a-paragraph) (util/children-of continuation)))
 
-(defn- paragraph-blank [a-paragraph parent functions]
+(defn- paragraph-blank [a-paragraph parent protocols]
   (util/attribute a-paragraph :open? false)
   nil)
 
@@ -30,7 +30,7 @@
 (defn- paragraph-lazy? [a-paragraph]
   true)
 
-(defn- paragraph-next-block [a-paragraph line pos grammar functions]
+(defn- paragraph-next-block [a-paragraph line pos grammar protocols]
   (def result (peg/match grammar line pos))
   (def block (get result 0))
   (defn heading? []
@@ -40,12 +40,12 @@
   (cond
     (heading?)
     [[:heading @{:level 2 :open? false :inlines? true :kind :setext} @["-"]] (length line)]
-    ((util/get-fn :needs-nl? block functions) block)
+    ((util/get-fn :needs-nl? block protocols) block)
     [(util/to-continuation :paragraph line pos) (length line)]
     # default
     result))
 
-(util/add-to state/rules
+(util/add-to state/protocols
   {:blocks
     {:paragraph {:append     paragraph-append
                  :blank      paragraph-blank

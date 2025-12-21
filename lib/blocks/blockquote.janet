@@ -1,5 +1,6 @@
 (import ../state)
 (import ../util)
+(import ../container)
 
 (defn- blockquote [trailing-space]
   (++ state/col-edge)
@@ -12,11 +13,12 @@
 (def grammar
   ~{:blockquote (/ (* ">" '(any :space)) ,blockquote)})
 
-(defn- blockquote-see-blank [a-blockquote functions]
+(defn- blockquote-see-blank [a-blockquote protocols]
   (when (util/attribute a-blockquote :open?)
     (util/attribute a-blockquote :open? false)
-    (util/close-children a-blockquote functions)))
+    (util/close-children a-blockquote protocols)))
 
-(util/add-to state/rules
-  @{:blocks
-    @{:blockquote {:see-blank   blockquote-see-blank}}})
+(util/add-to state/protocols
+  {:blocks
+    {:blockquote (container/make-protocol
+                   {:see-blank blockquote-see-blank})}})

@@ -100,7 +100,7 @@
                      (not (util/attribute prev-opener :image?)))
             (util/attribute prev-opener :inactive? true)))))))
 
-(util/add-to state/rules
+(util/add-to state/protocols
   {:inlines
     {:image    {:close    image-close}
      :link     {:close    link-close

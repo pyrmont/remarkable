@@ -11,7 +11,7 @@
 
 ## Functions
 
-(defn- linkdef-close [a-def &opt parent functions]
+(defn- linkdef-close [a-def &opt parent protocols]
   (defn register-link [ref-text dest &opt title]
     (def ref (util/normalise ref-text))
     (unless (get state/links ref)
@@ -59,15 +59,15 @@
 (defn- linkdef-needs-nl? [a-def]
   true)
 
-(defn- linkdef-next-block [a-def line pos grammar functions]
+(defn- linkdef-next-block [a-def line pos grammar protocols]
   (def result (peg/match grammar line pos))
   (def block (get result 0))
-  (def needs-nl-fn (util/get-fn :needs-nl? block functions))
+  (def needs-nl-fn (util/get-fn :needs-nl? block protocols))
   (if (needs-nl-fn block)
     [(util/to-continuation :paragraph line pos) (length line)]
     result))
 
-(util/add-to state/rules
+(util/add-to state/protocols
   {:blocks
     {:linkdef {:blank       linkdef-close
                :close       linkdef-close

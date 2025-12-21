@@ -26,7 +26,7 @@
   (when (punctuation/upunc? (bytes-to-codepoint s))
     s))
 
-(util/add-to state/rules @{:inlines @{}})
+(util/add-to state/protocols @{:inlines @{}})
 
 (def inline ~@[+])
 
@@ -88,6 +88,8 @@
 (defn- default-inline-close [node delim ancestors]
   (array/pop ancestors))
 
-(util/add-to state/rules
+## Inline default protocol
+
+(util/add-to state/protocols
   {:inlines
     {'default {:close default-inline-close}}})
