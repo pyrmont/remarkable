@@ -1,6 +1,6 @@
 (import ../res/helpers/util :as util)
 
-(import ../lib/init :as remark)
+(import ../init :as remark)
 
 (def examples
   (parse (slurp "res/fixtures/cmark_spec.jdn")))

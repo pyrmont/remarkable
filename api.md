@@ -269,7 +269,7 @@ named parameters for extending the parser:
 
 There are helper utilities for extension in lib/extend.janet.
 
-[15]: lib/init.janet#L8
+[15]: lib/remarkable.janet#L8
 
 
 ## render-html
@@ -291,7 +291,7 @@ with a struct/table `opts` with the following keys:
 
 Render functions have the signature `(defn my-renderer [node renderers opts] ...)`.
 
-[16]: lib/init.janet#L31
+[16]: lib/remarkable.janet#L31
 
 
 ## reset-state
@@ -309,5 +309,5 @@ the extend module, resetting the state to the default configuration. This is
 primarily useful for testing when you want to ensure a clean state between
 tests.
 
-[17]: lib/init.janet#L47
+[17]: lib/remarkable.janet#L47
 

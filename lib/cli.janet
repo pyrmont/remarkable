@@ -1,6 +1,6 @@
 (import ../deps/argy-bargy/argy-bargy :as argy)
 
-(import ./init :as remark)
+(import ./remarkable :as remark)
 
 (def config
   ```

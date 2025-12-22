@@ -24,7 +24,7 @@
   (default inlines (peg/compile inlines/grammar))
   (default protocols state/protocols)
   (default priorities state/priorities)
-  (-> input
+  (-> (string/trimr input " \t\v")
       (parser/parse-blocks blocks protocols)
       (parser/parse-all-inlines inlines protocols priorities)))
 

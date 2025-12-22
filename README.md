@@ -106,8 +106,8 @@ Add custom rendering logic without modifying core files:
             {:renderers {:note render-note}}))
 ```
 
-See `test/extensibility.janet` for some examples. For detailed API
-documentation, see the [API document](api.md).
+See `test/extend.janet` for some examples. For detailed API documentation, see
+the [API document](api.md).
 
 ## CLI Utility
 
