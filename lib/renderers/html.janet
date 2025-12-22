@@ -1,4 +1,5 @@
 (import ../util)
+(import ../node)
 
 (defn- html-content [buf line]
   (each c line
@@ -13,7 +14,7 @@
 
 (defn- to-fragment [node]
   (def buf @"")
-  (each child (util/children-of node)
+  (each child (node/children-of node)
     (if (bytes? child)
       (buffer/push buf child)
       (buffer/push buf (to-fragment child))))
@@ -111,7 +112,7 @@
 
 (defn- render-codeblock [node renderers opts]
   (def [_ _ children] node)
-  (def info (util/attribute node :info))
+  (def info (node/attribute node :info))
   (def buf @"")
   (buffer/push buf
                "<pre><code"
@@ -124,7 +125,7 @@
 
 (defn- render-heading [node renderers opts]
   (def [_ _ children] node)
-  (def level (string (util/attribute node :level)))
+  (def level (string (node/attribute node :level)))
   (def buf @"")
   (buffer/push buf "<h" level ">")
   (each child children
@@ -143,8 +144,8 @@
 
 (defn- render-list [node renderers opts]
   (def [_ _ children] node)
-  (def list-tag (case (util/attribute node :kind) :bullet "ul" :ordinal "ol"))
-  (def list-start (util/attribute node :start))
+  (def list-tag (case (node/attribute node :kind) :bullet "ul" :ordinal "ol"))
+  (def list-start (node/attribute node :start))
   (def list-attrs (if (or (nil? list-start) (= 1 list-start))
                     ""
                     (string " start=\"" list-start "\"")))
@@ -153,8 +154,8 @@
   (each item children
     (buffer/push buf "\n<li>")
     (var closing-nl? false)
-    (each child (util/children-of item)
-      (if (and (util/attribute node :tight?)
+    (each child (node/children-of item)
+      (if (and (node/attribute node :tight?)
                (= :paragraph (get child 0)))
         (buffer/push buf (render-with-registry child renderers (merge opts {:start-nl? false :inner? true})))
         (do

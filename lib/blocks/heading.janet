@@ -1,5 +1,6 @@
 (import ../state)
 (import ../util)
+(import ../node)
 
 ## Grammar
 
@@ -23,21 +24,21 @@
 ## Functions
 
 (defn- heading-equal? [a-heading block]
-  (= :paragraph (util/type-of block)))
+  (= :paragraph (node/type-of block)))
 
 (defn- heading-lazy? [a-heading]
-  (= :setext (util/attribute a-heading :kind)))
+  (= :setext (node/attribute a-heading :kind)))
 
 (defn- heading-follower [a-heading block]
-  (when (= :paragraph (util/type-of block))
+  (when (= :paragraph (node/type-of block))
     a-heading))
 
 (defn- heading-replace [a-heading siblings]
-  (case (util/attribute a-heading :kind)
+  (case (node/attribute a-heading :kind)
     :atx
     (array/push siblings a-heading)
     :setext
-    (if (= :paragraph (util/type-of (array/peek siblings)))
+    (if (= :paragraph (node/type-of (array/peek siblings)))
       (do
         (def last-p (array/pop siblings))
         (def children (get a-heading 2))
@@ -46,9 +47,9 @@
         (array/push siblings a-heading))
       (do
         (def text (first (get a-heading 2))) # TODO Can we assume a heading only has one element?
-        (if (util/attribute (array/peek siblings) :open?)
+        (if (node/attribute (array/peek siblings) :open?)
           (do
-            (def parent (util/last-descendant (array/peek siblings)))
+            (def parent (node/last-descendant (array/peek siblings)))
             (array/push (get parent 2) text))
           (array/push siblings [:paragraph @{:open? true :inlines? true} @[text]]))))))
 

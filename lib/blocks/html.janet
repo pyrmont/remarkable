@@ -1,5 +1,6 @@
 (import ../state)
 (import ../util)
+(import ../node)
 
 ## Grammar
 
@@ -51,8 +52,8 @@
 ## Functions
 
 (defn- html-close [an-html &opt parent protocols]
-  (util/attribute an-html :open? false)
-  (def lines (util/children-of an-html))
+  (node/attribute an-html :open? false)
+  (def lines (node/children-of an-html))
   (def last-line (last lines))
   (def last-index (dec (length last-line)))
   (var i last-index)
@@ -67,17 +68,17 @@
 
 
 (defn- html-continue [an-html block]
-  (def lines (util/children-of block))
+  (def lines (node/children-of block))
   (if (= :close (first lines))
     (do
       (unless (one? (length lines))
-        (array/push (util/children-of an-html) (get lines 1)))
+        (array/push (node/children-of an-html) (get lines 1)))
       (html-close an-html))
-    (array/concat (util/children-of an-html) lines)))
+    (array/concat (node/children-of an-html) lines)))
 
 
 (defn- html-needs-nl? [an-html]
-  (= 7 (util/attribute an-html :kind)))
+  (= 7 (node/attribute an-html :kind)))
 
 
 (defn- html-next-block [an-html line pos grammar protocols]
@@ -86,12 +87,12 @@
       [:html {} [:close]]
       [:html {} [:close text]]))
   (defn code [text]
-    [:html {:kind (util/attribute an-html :kind)} [text]])
+    [:html {:kind (node/attribute an-html :kind)} [text]])
   (def html-grammar
     ~{:main   (* (+ :close :code) ($))
       :eol    -1
       :space  (set " \t\n")
-      :close  (/ ,(case (util/attribute an-html :kind)
+      :close  (/ ,(case (node/attribute an-html :kind)
                     1 ~(<- (* (thru (* "</" ,(util/words "pre" "script" "style" "") ">")) (thru :eol)))
                     2 ~(<- (* (thru "-->") (thru :eol)))
                     3 ~(<- (* (thru "?>") (thru :eol)))
@@ -100,7 +101,7 @@
                     6 ~(* (any :space) :eol)
                     7 ~(* (any :space) :eol)) ,close)
       :code   (/ '(thru :eol) ,code)})
-  (peg/match html-grammar line pos (util/attribute an-html :kind)))
+  (peg/match html-grammar line pos (node/attribute an-html :kind)))
 
 (defn- html-see-blank [an-html protocols]
   true)

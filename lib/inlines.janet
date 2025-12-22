@@ -28,7 +28,7 @@
 
 (util/add-to state/protocols @{:inlines @{}})
 
-(def inline ~@[+])
+(def inlines ~@[+])
 
 (import ./inlines/autolink)
 (import ./inlines/codespan)
@@ -37,7 +37,7 @@
 (import ./inlines/hardbreak)
 (import ./inlines/rawhtml)
 
-(array/push inline
+(array/push inlines
   :codespan
   :rawhtml
   :autolink
@@ -72,7 +72,7 @@
      :escaped (+ (* "\\" ':ascii-punc)  # Only ASCII punctuation can be escaped
                  '(* "\\" (if-not :nl 1)))
      :inlines (any :inline)
-     :inline  (+ ,(tuple ;inline))
+     :inline  (+ ,(tuple ;inlines))
      :trail (* :space ':nl)
      :text  (+ (% (some (+ :escaped :entity :trail :char))) '1)})
 

@@ -1,5 +1,6 @@
 (import ./state)
 (import ./util)
+(import ./node)
 
 (util/add-to state/protocols @{:blocks @{}})
 
@@ -54,25 +55,25 @@
 ## Block functions
 
 (defn- default-block-append [node block protocols]
-  (unless (= :blank (util/type-of block))
-    (def replace-fn (util/get-fn :replace block protocols))
+  (unless (= :blank (node/type-of block))
+    (def replace-fn (node/get-fn :replace block protocols))
     (if replace-fn
-      (replace-fn block (util/children-of node))
-      (if (def peer (util/next-container node))
-        ((util/get-fn :continue peer protocols) peer block)
-        (array/push (util/children-of node) block)))))
+      (replace-fn block (node/children-of node))
+      (if (def peer (node/next-container node))
+        ((node/get-fn :continue peer protocols) peer block)
+        (array/push (node/children-of node) block)))))
 
 (defn- default-block-blank [node parent protocols]
-  (util/next-container node))
+  (node/next-container node))
 
 (defn- default-block-close [node &opt parent]
-  (util/attribute node :open? false))
+  (node/attribute node :open? false))
 
 (defn- default-block-continue [peer block]
-  (array/concat (util/children-of peer) (util/children-of block)))
+  (array/concat (node/children-of peer) (node/children-of block)))
 
 (defn- default-block-equal? [node block]
-  (= (util/type-of node) (util/type-of block)))
+  (= (node/type-of node) (node/type-of block)))
 
 (defn- default-block-follower [node block]
   nil)

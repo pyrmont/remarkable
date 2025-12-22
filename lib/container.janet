@@ -1,11 +1,12 @@
 (import ./state)
 (import ./util)
+(import ./node)
 
 (defn- blank [node parent protocols]
-  (util/next-container node))
+  (node/next-container node))
 
 (defn- equal? [node block]
-  (= (util/type-of node) (util/type-of block)))
+  (= (node/type-of node) (node/type-of block)))
 
 (defn- next-block [node line pos grammar protocols]
   (peg/match grammar line pos))

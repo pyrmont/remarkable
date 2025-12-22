@@ -1,5 +1,6 @@
 (import ../state)
 (import ../util)
+(import ../node)
 
 ## Grammar
 
@@ -12,19 +13,19 @@
 ## Functions
 
 (defn- paragraph-append [a-paragraph continuation protocols]
-  (array/concat (util/children-of a-paragraph) (util/children-of continuation)))
+  (array/concat (node/children-of a-paragraph) (node/children-of continuation)))
 
 (defn- paragraph-blank [a-paragraph parent protocols]
-  (util/attribute a-paragraph :open? false)
+  (node/attribute a-paragraph :open? false)
   nil)
 
 (defn- paragraph-equal? [a-paragraph block]
-  (or (= :paragraph (util/type-of block))
-      (and (= :heading (util/type-of block))
-           (= :setext (util/attribute block :kind)))))
+  (or (= :paragraph (node/type-of block))
+      (and (= :heading (node/type-of block))
+           (= :setext (node/attribute block :kind)))))
 
 (defn- paragraph-follower [a-paragraph block]
-  (when (= :paragraph (util/type-of block))
+  (when (= :paragraph (node/type-of block))
     a-paragraph))
 
 (defn- paragraph-lazy? [a-paragraph]
@@ -34,13 +35,13 @@
   (def result (peg/match grammar line pos))
   (def block (get result 0))
   (defn heading? []
-    (and (= :thematic-break (util/type-of block))
-         (= 45 (util/attribute block :char))
-         (peg/match ~(* (any " ") (some "-") (any " ") -1) (first (util/children-of block)))))
+    (and (= :thematic-break (node/type-of block))
+         (= 45 (node/attribute block :char))
+         (peg/match ~(* (any " ") (some "-") (any " ") -1) (first (node/children-of block)))))
   (cond
     (heading?)
     [[:heading @{:level 2 :open? false :inlines? true :kind :setext} @["-"]] (length line)]
-    ((util/get-fn :needs-nl? block protocols) block)
+    ((node/get-fn :needs-nl? block protocols) block)
     [(util/to-continuation :paragraph line pos) (length line)]
     # default
     result))

@@ -1,5 +1,6 @@
 (import ../state)
 (import ../util)
+(import ../node)
 
 ## Grammar
 
@@ -32,28 +33,28 @@
 ## Functions
 
 (defn- image-close [node delim ancestors]
-  (def meta (util/attribute delim :meta))
+  (def meta (node/attribute delim :meta))
   (merge-into (get node 1) meta)
   (array/pop ancestors))
 
 (defn- link-close [node delim ancestors]
-  (if (util/attribute delim :drop?)
-    (array/pop (util/children-of (array/peek ancestors)))
-    (merge-into (get node 1) (util/attribute delim :meta)))
+  (if (node/attribute delim :drop?)
+    (array/pop (node/children-of (array/peek ancestors)))
+    (merge-into (get node 1) (node/attribute delim :meta)))
   (array/pop ancestors))
 
 (defn- link-match? [open-i close-i delimiters]
   (def opener (get delimiters open-i))
   (def closer (get delimiters close-i))
-  (and (util/attribute opener :left?)
-       (not (util/attribute opener :skip?))
-       (not (zero? (util/attribute opener :count)))
-       (not (zero? (util/attribute closer :count)))))
+  (and (node/attribute opener :left?)
+       (not (node/attribute opener :skip?))
+       (not (zero? (node/attribute opener :count)))
+       (not (zero? (node/attribute closer :count)))))
 
 (defn- link-meta-from-label [open-i close-i delimiters text]
   (defn extract-ref [opener closer]
     (-> text
-        (string/slice (util/attribute opener :end-pos) (util/attribute closer :start-pos))
+        (string/slice (node/attribute opener :end-pos) (node/attribute closer :start-pos))
         util/normalise))
   (var result nil)
   (def closer (get delimiters close-i))
@@ -61,15 +62,15 @@
   (def label-closer (get delimiters (+ 2 close-i)))
   (if (and label-opener
            label-closer
-           (= :link (util/attribute label-opener :kind) (util/attribute label-closer :kind))
-           (= (util/attribute closer :end-pos) (util/attribute label-opener :start-pos)))
+           (= :link (node/attribute label-opener :kind) (node/attribute label-closer :kind))
+           (= (node/attribute closer :end-pos) (node/attribute label-opener :start-pos)))
     (do
       (set result (get state/links (extract-ref label-opener label-closer)))
       (when result
-        (array/push (util/children-of label-opener) [:open {:kind :link} []])
-        (array/push (util/children-of label-closer) [:close {:drop? true} []])
-        (util/attribute label-opener :count 0)
-        (util/attribute label-closer :count 0)))
+        (array/push (node/children-of label-opener) [:open {:kind :link} []])
+        (array/push (node/children-of label-closer) [:close {:drop? true} []])
+        (node/attribute label-opener :count 0)
+        (node/attribute label-closer :count 0)))
     (do
       (def opener (get delimiters open-i))
       (set result (get state/links (extract-ref opener closer)))))
@@ -78,27 +79,27 @@
 (defn- link-match-up [open-i close-i delimiters text]
   (def opener (get delimiters open-i))
   (def closer (get delimiters close-i))
-  (unless (or (util/attribute opener :inactive?)
-              (util/attribute closer :meta))
-    (util/attribute closer :meta (link-meta-from-label open-i close-i delimiters text)))
-  (if (or (util/attribute opener :inactive?)
-          (nil? (util/attribute closer :meta)))
+  (unless (or (node/attribute opener :inactive?)
+              (node/attribute closer :meta))
+    (node/attribute closer :meta (link-meta-from-label open-i close-i delimiters text)))
+  (if (or (node/attribute opener :inactive?)
+          (nil? (node/attribute closer :meta)))
     (do
-      (util/attribute opener :skip? true)
-      (util/attribute closer :skip? true))
+      (node/attribute opener :skip? true)
+      (node/attribute closer :skip? true))
     (do
-      (def kind (if (util/attribute opener :image?) :image :link))
-      (array/push (util/children-of opener) [:open @{:kind kind} @[]])
-      (util/attribute opener :count 0)
-      (array/push (util/children-of closer) [:close @{:kind kind :meta (util/attribute closer :meta)} @[]])
-      (util/attribute closer :count 0)
-      (unless (util/attribute opener :image?)
+      (def kind (if (node/attribute opener :image?) :image :link))
+      (array/push (node/children-of opener) [:open @{:kind kind} @[]])
+      (node/attribute opener :count 0)
+      (array/push (node/children-of closer) [:close @{:kind kind :meta (node/attribute closer :meta)} @[]])
+      (node/attribute closer :count 0)
+      (unless (node/attribute opener :image?)
         (var i open-i)
         (while (def prev-opener (get delimiters (-- i)))
-          (when (and (util/attribute prev-opener :left?)
-                     (= :link (util/attribute prev-opener :kind))
-                     (not (util/attribute prev-opener :image?)))
-            (util/attribute prev-opener :inactive? true)))))))
+          (when (and (node/attribute prev-opener :left?)
+                     (= :link (node/attribute prev-opener :kind))
+                     (not (node/attribute prev-opener :image?)))
+            (node/attribute prev-opener :inactive? true)))))))
 
 (util/add-to state/protocols
   {:inlines

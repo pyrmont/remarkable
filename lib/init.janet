@@ -43,3 +43,23 @@
   ```
   [root &opt opts]
   (html/render root opts))
+
+(defn reset-state
+  ```
+  Resets the global state to defaults
+
+  This function clears all custom grammars and protocols that were added via
+  the extend module, resetting the state to the default configuration. This is
+  primarily useful for testing when you want to ensure a clean state between
+  tests.
+  ```
+  []
+  (array/clear state/blocks)
+  (array/push state/blocks ;blocks/blocks)
+  (array/clear state/inlines)
+  (array/push state/inlines ;inlines/inlines)
+  (table/clear state/custom-block-grammars)
+  (table/clear state/custom-block-protocols)
+  (table/clear state/custom-inline-grammars)
+  (table/clear state/custom-inline-protocols)
+  (buffer/clear state/custom-inline-delimiters))

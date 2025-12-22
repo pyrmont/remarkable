@@ -1,5 +1,6 @@
 (import ../state)
 (import ../util)
+(import ../node)
 
 ## Grammar
 
@@ -34,14 +35,14 @@
 ## Functions
 
 (defn- codeblock-blank [a-codeblock parent protocols]
-  (when (util/attribute a-codeblock :open?)
-    (array/push (util/children-of a-codeblock) "\n"))
+  (when (node/attribute a-codeblock :open?)
+    (array/push (node/children-of a-codeblock) "\n"))
   nil)
 
 (defn- codeblock-close [a-codeblock &opt parent]
-  (util/attribute a-codeblock :open? false)
-  (when (= :indented (util/attribute a-codeblock :kind))
-    (def lines (util/children-of a-codeblock))
+  (node/attribute a-codeblock :open? false)
+  (when (= :indented (node/attribute a-codeblock :kind))
+    (def lines (node/children-of a-codeblock))
     (def last-index (dec (length lines)))
     (var start 0)
     (var line (get lines start))
@@ -56,32 +57,32 @@
       (array/remove lines 0 start))))
 
 (defn- codeblock-continue [a-codeblock block]
-  (def lines (util/children-of block))
+  (def lines (node/children-of block))
   (if (= :close (first lines))
     (codeblock-close a-codeblock)
-    (array/concat (util/children-of a-codeblock) lines)))
+    (array/concat (node/children-of a-codeblock) lines)))
 
 (defn- codeblock-equal? [a-codeblock block]
-  (and (= :codeblock (util/type-of block))
-       (util/attribute a-codeblock :open?)))
+  (and (= :codeblock (node/type-of block))
+       (node/attribute a-codeblock :open?)))
 
 (defn- codeblock-follower [a-codeblock block]
-  (when (= :paragraph (util/type-of block))
-    [:paragraph {} (util/children-of a-codeblock)]))
+  (when (= :paragraph (node/type-of block))
+    [:paragraph {} (node/children-of a-codeblock)]))
 
 (defn- codeblock-lazy? [a-codeblock]
-  (= :indented (util/attribute a-codeblock :kind)))
+  (= :indented (node/attribute a-codeblock :kind)))
 
 (defn- codeblock-needs-nl? [a-codeblock]
-  (= :indented (util/attribute a-codeblock :kind)))
+  (= :indented (node/attribute a-codeblock :kind)))
 
 (defn- codeblock-next-block [a-codeblock line pos grammar protocols]
-  (if (= :indented (util/attribute a-codeblock :kind))
+  (if (= :indented (node/attribute a-codeblock :kind))
     (peg/match grammar line pos)
     (do
-      (def delim (util/attribute a-codeblock :delim))
-      (def delim-num (util/attribute a-codeblock :num))
-      (def max-indent (util/attribute a-codeblock :indent))
+      (def delim (node/attribute a-codeblock :delim))
+      (def delim-num (node/attribute a-codeblock :num))
+      (def max-indent (node/attribute a-codeblock :indent))
       (defn fence []
         (when (< (- state/col-edge state/col-pos) 4)
           [:codeblock {} [:close]]))
@@ -100,7 +101,7 @@
       (peg/match fence-grammar line pos))))
 
 (defn- codeblock-see-blank [a-codeblock protocols]
-  (util/attribute a-codeblock :open?))
+  (node/attribute a-codeblock :open?))
 
 (util/add-to state/protocols
   @{:blocks

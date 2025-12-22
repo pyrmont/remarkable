@@ -1,5 +1,6 @@
 (import ../state)
 (import ../util)
+(import ../node)
 
 ## Grammar
 
@@ -42,53 +43,53 @@
 (defn- emphasis-match? [open-i close-i delimiters]
   (def opener (get delimiters open-i))
   (def closer (get delimiters close-i))
-  (and (and (= (util/attribute opener :kind) (util/attribute closer :kind))
-            (= (util/attribute opener :delim) (util/attribute closer :delim))
-            (not (util/attribute opener :skip?))
-            (not= 0 (util/attribute opener :count))
-            (not= 0 (util/attribute closer :count)))
-       (case (util/attribute closer :delim)
+  (and (and (= (node/attribute opener :kind) (node/attribute closer :kind))
+            (= (node/attribute opener :delim) (node/attribute closer :delim))
+            (not (node/attribute opener :skip?))
+            (not= 0 (node/attribute opener :count))
+            (not= 0 (node/attribute closer :count)))
+       (case (node/attribute closer :delim)
          "*"
          (do
            (and # rules 1 and 5
-                (util/attribute opener :left?)
+                (node/attribute opener :left?)
                 # rules 3 and 7
-                (util/attribute closer :right?)
+                (node/attribute closer :right?)
                 # rules 9 and 10
-                (or (and (not (util/attribute opener :right?))
-                         (not (util/attribute closer :left?)))
-                    (or (not= 0 (% (+ (util/attribute opener :count) (util/attribute closer :count)) 3))
-                        (and (= 0 (% (util/attribute opener :count) 3))
-                             (= 0 (% (util/attribute closer :count) 3)))))))
+                (or (and (not (node/attribute opener :right?))
+                         (not (node/attribute closer :left?)))
+                    (or (not= 0 (% (+ (node/attribute opener :count) (node/attribute closer :count)) 3))
+                        (and (= 0 (% (node/attribute opener :count) 3))
+                             (= 0 (% (node/attribute closer :count) 3)))))))
          "_"
          (do
            (and # rules 2 and 6
-                (and (util/attribute opener :left?)
-                     (or (not (util/attribute opener :right?))
-                         (util/attribute opener :pre-punc?)))
+                (and (node/attribute opener :left?)
+                     (or (not (node/attribute opener :right?))
+                         (node/attribute opener :pre-punc?)))
                 # rules 4 and 8
-                (and (util/attribute closer :right?)
-                     (or (not (util/attribute closer :left?))
-                         (util/attribute closer :post-punc?)))
+                (and (node/attribute closer :right?)
+                     (or (not (node/attribute closer :left?))
+                         (node/attribute closer :post-punc?)))
                 # rules 9 and 10
-                (or (and (not (util/attribute opener :right?))
-                         (not (util/attribute closer :left?)))
-                    (or (not= 0 (% (+ (util/attribute opener :count) (util/attribute closer :count)) 3))
-                        (and (= 0 (% (util/attribute opener :count) 3))
-                             (= 0 (% (util/attribute closer :count) 3))))))))))
+                (or (and (not (node/attribute opener :right?))
+                         (not (node/attribute closer :left?)))
+                    (or (not= 0 (% (+ (node/attribute opener :count) (node/attribute closer :count)) 3))
+                        (and (= 0 (% (node/attribute opener :count) 3))
+                             (= 0 (% (node/attribute closer :count) 3))))))))))
 
 (defn- emphasis-match-up [open-i close-i delimiters text]
   (def opener (get delimiters open-i))
   (def closer (get delimiters close-i))
-  (def [kind len] (if (and (>= (util/attribute opener :count) 2)
-                           (>= (util/attribute closer :count) 2))
+  (def [kind len] (if (and (>= (node/attribute opener :count) 2)
+                           (>= (node/attribute closer :count) 2))
                     [:strong 2] [:emphasis 1]))
-  (array/insert (util/children-of opener) 0 [:open @{:kind kind} @[]])
-  (util/attribute opener :count (- (util/attribute opener :count) len))
-  (util/attribute opener :end-pos (- (util/attribute opener :end-pos) len))
-  (array/push (util/children-of closer) [:close @{:kind kind} @[]])
-  (util/attribute closer :count (- (util/attribute closer :count) len))
-  (util/attribute closer :start-pos (+ (util/attribute closer :start-pos) len)))
+  (array/insert (node/children-of opener) 0 [:open @{:kind kind} @[]])
+  (node/attribute opener :count (- (node/attribute opener :count) len))
+  (node/attribute opener :end-pos (- (node/attribute opener :end-pos) len))
+  (array/push (node/children-of closer) [:close @{:kind kind} @[]])
+  (node/attribute closer :count (- (node/attribute closer :count) len))
+  (node/attribute closer :start-pos (+ (node/attribute closer :start-pos) len)))
 
 (util/add-to state/protocols
   {:inlines

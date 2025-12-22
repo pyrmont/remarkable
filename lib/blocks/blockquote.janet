@@ -1,5 +1,6 @@
 (import ../state)
 (import ../util)
+(import ../node)
 (import ../container)
 
 (defn- blockquote [trailing-space]
@@ -14,9 +15,9 @@
   ~{:blockquote (/ (* ">" '(any :space)) ,blockquote)})
 
 (defn- blockquote-see-blank [a-blockquote protocols]
-  (when (util/attribute a-blockquote :open?)
-    (util/attribute a-blockquote :open? false)
-    (util/close-children a-blockquote protocols)))
+  (when (node/attribute a-blockquote :open?)
+    (node/attribute a-blockquote :open? false)
+    (node/close-children a-blockquote protocols)))
 
 (util/add-to state/protocols
   {:blocks
