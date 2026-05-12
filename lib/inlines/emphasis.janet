@@ -78,7 +78,7 @@
                         (and (= 0 (% (node/attribute opener :count) 3))
                              (= 0 (% (node/attribute closer :count) 3))))))))))
 
-(defn- emphasis-match-up [open-i close-i delimiters text]
+(defn- emphasis-match-up [open-i close-i delimiters _text]
   (def opener (get delimiters open-i))
   (def closer (get delimiters close-i))
   (def [kind len] (if (and (>= (node/attribute opener :count) 2)

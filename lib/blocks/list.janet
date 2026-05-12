@@ -31,7 +31,7 @@
 
 ## Functions
 
-(defn- list-blank [a-list parent protocols]
+(defn- list-blank [a-list _parent _protocols]
   (def item (node/next-container a-list))
   (when (and (not (nil? item))
              (node/attribute item :starts-blank?)
@@ -57,7 +57,7 @@
 # line is a continuation of the list. To check this we need to descend through
 # the open list items in the current list that are indented at least as much as
 # the current line.
-(defn- list-next-block [a-list line pos grammar protocols]
+(defn- list-next-block [a-list line pos grammar _protocols]
   (def next-pos (util/dedent line pos))
   (var next-b nil)
   (var parent-list nil)
@@ -107,7 +107,7 @@
     result
     [next-b next-pos]))
 
-(defn- list-item-equal? [an-item block]
+(defn- list-item-equal? [_an-item block]
   (= :list-item-continue (node/type-of block)))
 
 # Use container base with list-specific overrides

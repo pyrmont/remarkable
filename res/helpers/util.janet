@@ -85,7 +85,7 @@
   ```
   [url]
   (def proc (os/spawn ["curl" "-s" url] :p {:in :pipe :err :pipe :out :pipe}))
-  (def [exit-code out err]
+  (def [exit-code out _err]
     (ev/gather
       (os/proc-wait proc)
       (ev/read (proc :out) :all)

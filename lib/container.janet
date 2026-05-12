@@ -2,16 +2,16 @@
 (import ./util)
 (import ./node)
 
-(defn- blank [node parent protocols]
+(defn- blank [node _parent _protocols]
   (node/next-container node))
 
 (defn- equal? [node block]
   (= (node/type-of node) (node/type-of block)))
 
-(defn- next-block [node line pos grammar protocols]
+(defn- next-block [_node line pos grammar _protocols]
   (peg/match grammar line pos))
 
-(defn- see-blank [node protocols]
+(defn- see-blank [_node _protocols]
   nil)
 
 (defn make-protocol

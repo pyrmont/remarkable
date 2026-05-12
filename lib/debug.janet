@@ -3,12 +3,10 @@
   (pp val)
   (print))
 
-
 (defn dapper [node &opt level]
   (default level 0)
   (def first-indent (string/repeat " " 0))
   (def item-indent (string/repeat " " (inc level)))
-
   (cond
     (indexed? node)
     (do
@@ -23,7 +21,6 @@
           (prinf "%s" (describe val)))
         (set first-item? false))
       (prinf "]"))
-
     (dictionary? node)
     (do
       (prinf "{")
@@ -39,8 +36,5 @@
           (prinf " %s" (describe val)))
         (set first-item? false))
       (prinf "}")))
-
   (when (zero? level)
     (prinf "\n")))
-
-

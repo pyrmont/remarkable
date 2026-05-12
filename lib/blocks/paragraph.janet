@@ -12,14 +12,14 @@
 
 ## Functions
 
-(defn- paragraph-append [a-paragraph continuation protocols]
+(defn- paragraph-append [a-paragraph continuation _protocols]
   (array/concat (node/children-of a-paragraph) (node/children-of continuation)))
 
-(defn- paragraph-blank [a-paragraph parent protocols]
+(defn- paragraph-blank [a-paragraph _parent _protocols]
   (node/attribute a-paragraph :open? false)
   nil)
 
-(defn- paragraph-equal? [a-paragraph block]
+(defn- paragraph-equal? [_a-paragraph block]
   (or (= :paragraph (node/type-of block))
       (and (= :heading (node/type-of block))
            (= :setext (node/attribute block :kind)))))
@@ -28,10 +28,10 @@
   (when (= :paragraph (node/type-of block))
     a-paragraph))
 
-(defn- paragraph-lazy? [a-paragraph]
+(defn- paragraph-lazy? [_a-paragraph]
   true)
 
-(defn- paragraph-next-block [a-paragraph line pos grammar protocols]
+(defn- paragraph-next-block [_a-paragraph line pos grammar protocols]
   (def result (peg/match grammar line pos))
   (def block (get result 0))
   (defn heading? []

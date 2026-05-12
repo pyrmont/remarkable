@@ -11,8 +11,6 @@
   (var pos 0)
   (var parent-node document)
   (var peer-node (node/next-container parent-node))
-  (defn contains-block? [curr-b]
-    (not (nil? (node/next-child curr-b))))
   # TODO: Is this too too complicated?
   (defn descend []
     (defn descend-1 []
@@ -52,7 +50,6 @@
             (set parent-node peer-node)
             (set peer-node next-n)))
         (set keep-descending? false))))
-
   (defn lazy-continuation []
     (when-let [lazy-fn     (node/get-fn :lazy? block protocols)
                _           (lazy-fn block)
@@ -62,7 +59,6 @@
                follow-b    (follower-fn block last-n)]
       (set block follow-b)
       last-n))
-
   (defn realise-block []
     (var curr-b (or (node/last-descendant block) block))
     (while (< pos (length line))
@@ -71,7 +67,6 @@
       (append-fn curr-b next-b protocols)
       (set curr-b (or (node/last-descendant next-b) next-b))
       (set pos next-pos)))
-
   (defn append []
     (if (= :blank (node/type-of block))
       (do
@@ -98,10 +93,8 @@
       (do
         (def append-fn (node/get-fn :append parent-node protocols))
         (append-fn parent-node block protocols))))
-
   # Match against existing nodes
   (descend)
-
   # Either continue direct, continue lazy or close children
   (unless (= :blank (node/type-of block))
     (when-let [peer-node (node/next-child parent-node)
@@ -110,14 +103,11 @@
       (if (def last-node (lazy-continuation))
         (set parent-node last-node)
         (node/close-children parent-node protocols))))
-
   # Realise block
   (realise-block)
-
   # Append to parent node
   (unless (nil? block)
     (append)))
-
 
 (defn parse-blocks [input grammar protocols]
   (state/reset-block-globals)

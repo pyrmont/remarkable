@@ -34,12 +34,12 @@
 
 ## Functions
 
-(defn- codeblock-blank [a-codeblock parent protocols]
+(defn- codeblock-blank [a-codeblock _parent _protocols]
   (when (node/attribute a-codeblock :open?)
     (array/push (node/children-of a-codeblock) "\n"))
   nil)
 
-(defn- codeblock-close [a-codeblock &opt parent]
+(defn- codeblock-close [a-codeblock &opt _parent]
   (node/attribute a-codeblock :open? false)
   (when (= :indented (node/attribute a-codeblock :kind))
     (def lines (node/children-of a-codeblock))
@@ -78,7 +78,7 @@
 (defn- codeblock-needs-nl? [a-codeblock]
   (= :indented (node/attribute a-codeblock :kind)))
 
-(defn- codeblock-next-block [a-codeblock line pos grammar protocols]
+(defn- codeblock-next-block [a-codeblock line pos grammar _protocols]
   (if (= :indented (node/attribute a-codeblock :kind))
     (peg/match grammar line pos)
     (do
@@ -102,7 +102,7 @@
           :code    (/ '(thru :eol) ,code)})
       (peg/match fence-grammar line pos))))
 
-(defn- codeblock-see-blank [a-codeblock protocols]
+(defn- codeblock-see-blank [a-codeblock _protocols]
   (node/attribute a-codeblock :open?))
 
 (util/add-to state/protocols

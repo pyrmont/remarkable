@@ -11,7 +11,7 @@
   (def note-protocol
     {:blocks
       {:note (remarkable/extend/make-container-protocol)}})
-  (defn- render-note [node renderers opts]
+  (defn- render-note [node _renderers _opts]
     (def [_ _ children] node)
     (def buf @"")
     (buffer/push buf "<div class=\"note\" style=\"border-left: 4px solid #007acc; padding-left: 1em; margin: 1em 0;\">")
@@ -67,10 +67,10 @@
     ~{:footnote-ref (/ (* "[^" '(some (if-not "]" 1)) "]") ,footnote-ref)})
   (def footnote-protocol (remarkable/extend/make-container-protocol
                            {:see-blank footnote-see-blank}))
-  (defn- render-footnote-ref [node renderers opts]
+  (defn- render-footnote-ref [node _renderers _opts]
     (def [_ _ lbl] node)
     (string "<sup id=\"fnref-" lbl "\"><a href=\"#fn-" lbl "\">" lbl "</a></sup>"))
-  (defn- render-footnote-def [node renderers opts]
+  (defn- render-footnote-def [node _renderers _opts]
     (def [_ _ children] node)
     (def content (first children))
     (def m (peg/match ~(* "[^" '(to "]") "]: " '(to -1)) content))
@@ -147,7 +147,7 @@
   (def custom-inlines (remarkable/extend/build-inlines-grammar))
   (def text "This is ^^highlighted^^ text.")
   (def ast (remarkable/parse-md text :inlines (peg/compile custom-inlines)))
-  (defn- render-highlight [node renderers opts]
+  (defn- render-highlight [node _renderers _opts]
     (def [_ _ content] node)
     (string "<mark>" content "</mark>"))
   (def html (remarkable/render-html ast {:renderers {:highlight render-highlight}}))

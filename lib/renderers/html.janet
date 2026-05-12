@@ -24,7 +24,7 @@
 (var render-with-registry nil)
 
 # Inline renderers
-(defn- render-codespan [node renderers opts]
+(defn- render-codespan [node _renderers _opts]
   (def [_ _ children] node)
   (def buf @"")
   (buffer/push buf "<code>")
@@ -43,7 +43,7 @@
   (buffer/push buf "</em>")
   (string buf))
 
-(defn- render-image [node renderers opts]
+(defn- render-image [node _renderers _opts]
   (def [_ attrs children] node)
   (def buf @"")
   (buffer/push buf "<img src=\"" (get attrs :url) "\"")
@@ -59,7 +59,7 @@
   (buffer/push buf "\" />")
   (string buf))
 
-(defn- render-hardbreak [node renderers opts]
+(defn- render-hardbreak [_node _renderers _opts]
   "<br />\n")
 
 (defn- render-link [node renderers opts]
@@ -78,7 +78,7 @@
   (buffer/push buf "</a>")
   (string buf))
 
-(defn- render-rawhtml [node renderers opts]
+(defn- render-rawhtml [node _renderers _opts]
   (def [_ _ children] node)
   children)
 
@@ -94,7 +94,7 @@
   (string buf))
 
 # Block renderers
-(defn- render-document [node renderers opts]
+(defn- render-document [node renderers _opts]
   (def [_ _ children] node)
   (def buf @"")
   (each child children
@@ -110,7 +110,7 @@
   (buffer/push buf "\n</blockquote>")
   (string buf))
 
-(defn- render-codeblock [node renderers opts]
+(defn- render-codeblock [node _renderers _opts]
   (def [_ _ children] node)
   (def info (node/attribute node :info))
   (def buf @"")
@@ -135,7 +135,7 @@
   (buffer/push buf "</h" level ">")
   (string buf))
 
-(defn- render-html [node renderers opts]
+(defn- render-html [node _renderers _opts]
   (def [_ _ children] node)
   (def buf @"")
   (each line children
@@ -181,7 +181,7 @@
     (buffer/push buf "</p>"))
   (string buf))
 
-(defn- render-thematic-break [node renderers opts]
+(defn- render-thematic-break [_node _renderers _opts]
   "<hr />")
 
 # Default renderer registry

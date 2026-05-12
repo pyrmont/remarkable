@@ -23,7 +23,7 @@
 
 ## Functions
 
-(defn- heading-equal? [a-heading block]
+(defn- heading-equal? [_a-heading block]
   (= :paragraph (node/type-of block)))
 
 (defn- heading-lazy? [a-heading]

@@ -63,10 +63,10 @@
         ((node/get-fn :continue peer protocols) peer block)
         (array/push (node/children-of node) block)))))
 
-(defn- default-block-blank [node parent protocols]
+(defn- default-block-blank [node _parent _protocols]
   (node/next-container node))
 
-(defn- default-block-close [node &opt parent]
+(defn- default-block-close [node &opt _parent]
   (node/attribute node :open? false))
 
 (defn- default-block-continue [peer block]
@@ -75,19 +75,19 @@
 (defn- default-block-equal? [node block]
   (= (node/type-of node) (node/type-of block)))
 
-(defn- default-block-follower [node block]
+(defn- default-block-follower [_node _block]
   nil)
 
-(defn- default-block-lazy? [block]
+(defn- default-block-lazy? [_block]
   false)
 
-(defn- default-block-needs-nl? [block]
+(defn- default-block-needs-nl? [_block]
   false)
 
-(defn- default-block-next-block [node line pos grammar protocols]
+(defn- default-block-next-block [_node line pos grammar _protocols]
   (peg/match grammar line pos))
 
-(defn- default-block-see-blank [node protocols]
+(defn- default-block-see-blank [_node _protocols]
   nil)
 
 ## Block default protocol

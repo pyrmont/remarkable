@@ -52,6 +52,6 @@
           (file/write dest indent)
           (file/write dest (string "0x" before " [" (string/join afters " ") "]\n")))))
     (file/write dest "})\n")
-    (file/write dest "\n\n")
+    (file/write dest "\n")
     (file/write dest case-fold-fn)
     (print "Extracted " cnt " mappings to " output))

@@ -85,7 +85,7 @@
 
 ## Inline functions
 
-(defn- default-inline-close [node delim ancestors]
+(defn- default-inline-close [_node _delim ancestors]
   (array/pop ancestors))
 
 ## Inline default protocol

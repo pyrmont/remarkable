@@ -12,7 +12,7 @@
 
 ## Functions
 
-(defn- linkdef-close [a-def &opt parent protocols]
+(defn- linkdef-close [a-def &opt parent _protocols]
   (defn register-link [ref-text dest &opt title]
     (def ref (util/normalise ref-text))
     (unless (get state/links ref)
@@ -50,17 +50,17 @@
       (array/push (node/children-of parent) [:paragraph @{:indent (node/attribute a-def :indent) :open? false :inlines? true} @[content]])))
   nil)
 
-(defn- linkdef-lazy? [a-def]
+(defn- linkdef-lazy? [_a-def]
   true)
 
-(defn- linkdef-equal? [a-def block]
+(defn- linkdef-equal? [_a-def block]
   (or (= :paragraph (node/type-of block))
       (= :linkdef (node/type-of block))))
 
-(defn- linkdef-needs-nl? [a-def]
+(defn- linkdef-needs-nl? [_a-def]
   true)
 
-(defn- linkdef-next-block [a-def line pos grammar protocols]
+(defn- linkdef-next-block [_a-def line pos grammar protocols]
   (def result (peg/match grammar line pos))
   (def block (get result 0))
   (def needs-nl-fn (node/get-fn :needs-nl? block protocols))

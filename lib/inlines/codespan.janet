@@ -3,7 +3,7 @@
 
 ## Grammar
 
-(defn- codespan [delim content]
+(defn- codespan [_delim content]
   (def buf @"")
   (var only-spaces? true)
   (each c content

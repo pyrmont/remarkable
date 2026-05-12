@@ -51,7 +51,7 @@
 
 ## Functions
 
-(defn- html-close [an-html &opt parent protocols]
+(defn- html-close [an-html &opt _parent _protocols]
   (node/attribute an-html :open? false)
   (def lines (node/children-of an-html))
   (def last-line (last lines))
@@ -81,7 +81,7 @@
   (= 7 (node/attribute an-html :kind)))
 
 
-(defn- html-next-block [an-html line pos grammar protocols]
+(defn- html-next-block [an-html line pos _grammar _protocols]
   (defn close [&opt text]
     (if (nil? text)
       [:html {} [:close]]
@@ -103,7 +103,7 @@
       :code   (/ '(thru :eol) ,code)})
   (peg/match html-grammar line pos (node/attribute an-html :kind)))
 
-(defn- html-see-blank [an-html protocols]
+(defn- html-see-blank [_an-html _protocols]
   true)
 
 (util/add-to state/protocols

@@ -1587,7 +1587,6 @@
    0x1E921 [0x1E943]
 })
 
-
 (defn case-fold [s]
   (def buf @"")
   (var i 0)
